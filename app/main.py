@@ -72,7 +72,12 @@ class UpdateVideoModel(BaseModel):
         }
 
 
-@app.post("/", response_description="Add new video", response_model=VideoModel)
+@app.get("/")
+def read_root():
+    return {"name": "Archive API"}
+
+
+@app.post("/video", response_description="Add new video", response_model=VideoModel)
 async def create_video(video: VideoModel = Body(...)):
     video = jsonable_encoder(video)
     new_video = await db["videos"].insert_one(video)
@@ -81,7 +86,7 @@ async def create_video(video: VideoModel = Body(...)):
 
 
 @app.get(
-    "/", response_description="List all videos", response_model=List[VideoModel]
+    "/videos", response_description="List all videos", response_model=List[VideoModel]
 )
 async def list_videos():
     videos = await db["videos"].find().to_list(1000)
@@ -89,7 +94,7 @@ async def list_videos():
 
 
 @app.get(
-    "/{id}", response_description="Get a single video", response_model=VideoModel
+    "/video/{id}", response_description="Get a single video", response_model=VideoModel
 )
 async def show_video(id: str):
     if (video := await db["videos"].find_one({"_id": id})) is not None:
@@ -98,7 +103,7 @@ async def show_video(id: str):
     raise HTTPException(status_code=404, detail=f"Video {id} not found")
 
 
-@app.put("/{id}", response_description="Update a video", response_model=VideoModel)
+@app.put("/video/{id}", response_description="Update a video", response_model=VideoModel)
 async def update_video(id: str, video: UpdateVideoModel = Body(...)):
     video = {k: v for k, v in video.dict().items() if v is not None}
 
@@ -117,7 +122,7 @@ async def update_video(id: str, video: UpdateVideoModel = Body(...)):
     raise HTTPException(status_code=404, detail=f"Video {id} not found")
 
 
-@app.delete("/{id}", response_description="Delete a video")
+@app.delete("/video/{id}", response_description="Delete a video")
 async def delete_video(id: str):
     delete_result = await db["videos"].delete_one({"_id": id})
 
