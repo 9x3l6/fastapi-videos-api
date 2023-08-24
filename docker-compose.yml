@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.docker
+    ports:
+      - '8000:8000'
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/code
+    networks:
+      - db-network
+  mongodb:
+    image: mongo:6-jammy
+    ports:
+      - '27017:27017'
+    volumes:
+      - dbdata6:/data/db
+    networks:
+      - db-network
+
+volumes:
+  dbdata6:
+
+networks:
+  db-network:
+    driver: bridge
